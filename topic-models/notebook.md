@@ -5,9 +5,9 @@
 >>> import random; random.seed(1)
 ```
 
-# A Brief Introduction to Topic Modeling with Python
+# Topic Modeling - An Empirical Approach to Theme Detection
 
--- *Folgert Karsdorp* --
+[*Folgert Karsdorp*](https://github.com/fbkarsdorp)
 
 In this session we will employ an unsupervised model of text, one which often goes under the name 'Topic Model', to explore and make visible thematic aspects in the K-Pop comments dataset. Topic Models, or more precisely, mixed-membership models, have gained a lot of popularity as a method for identifying and organizing topical and thematic structures in text documents and text corpora (see e.g. Blei et al. 2003,  Griffiths & Steyvers 2004). The goal of this session is to introduce the very basics of Topic Models, and, subsequently, to show how Python can be employed to apply Topic Models to the K-Pop dataset. Ignoring any mathematical details, this introduction will primarily focus on the implementation and execution of Topic Models in Python, allowing us to concentrate on the interpretation, evaluation and visualization of the results.
 
@@ -106,14 +106,6 @@ Latent Dirichlet Allocation (especially implementations employing the collapsed 
 For the less patient readers, we have supplied a pre-trained model, which can be loaded by executing the following code block.
 
 ```python
->>> # IN FINAL VERSION, REMOVE THIS CELL!
-... import numpy as np
-...
->>> np.save("models/kpop-components-T25.npy", tm.components_)
->>> np.save("models/kpop-dtd-T25.npy", document_topic_distributions)
-```
-
-```python
 >>> # IGNORE THIS CELL WHEN TRAINING THE MODEL YOURSELF!
 ... import numpy as np
 ...
@@ -195,7 +187,7 @@ While pyLDAvis produces a wonderful interactive playground to explore the inferr
 >>> document_topic_distributions['Topic 1'].argmax()
 ```
 
-We could take the returned video ID and search for the corresponding video on YouTube, but it's much more convenient (and 😎) if we could do so directly in the notebook. The following code block implements a small function `best_video_for_topic` which takes the name of a particular topic as argument, and renders the video in which it features most prominently directly in the notebook:
+We could copy the returned video ID and search for the corresponding video on YouTube, but it's much more convenient (and 😎) if we could render the video here in the Jupyter notebook. The following code block implements a small function `best_video_for_topic` which takes the name of a particular topic as argument, and serves the video in which it features most prominently:
 
 ```python
 >>> from IPython.display import YouTubeVideo
@@ -208,7 +200,7 @@ We could take the returned video ID and search for the corresponding video on Yo
 Let's invoke the function, for instance for Topic 1:
 
 ```python
->>> best_video_for_topic('Topic 1')
+>>> best_video_for_topic('Topic 14')
 ```
 
 ## Exercises
