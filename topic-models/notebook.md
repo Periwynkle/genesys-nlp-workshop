@@ -44,27 +44,22 @@ According to this procedure, we might write (or generate) a text as follows:
 
 If it wasn't already, it should be clear by now that LDA has a completely unrealistic view on how documents are created. For example, it completely ignores all syntax and basically treats documents as bags of words. Yet, LDA's generative writing assumption is an explicit and powerful one, which, once reversed, enables us -- at least to a certain extent -- to *infer* topic mixtures and their associated words. 
 
-A well-know inference technique is the collapsed Gibbs sampler (as discussed in, e.g., Griffiths & Steyvers 2004). Leaving any technical details aside, this technique works as follows. Given a collection of documents, we aim to estimate their topic mixtures and the words associated with each topic. First we need to hypothesize how many topics $K$ are in the collection. Subsequently we go over all words in each individual document and randomly(!) assign it to one of the $K$ topics. Note that this random assignment of words to topics already provides us with a topic mixtures and topic-word distribution, though, needless to say, their quality leaves much to be desired. The remaining steps of the procedure aim to improve this initial assignment by iterating over the documents, and for each word $w_i$ in a particular document $d_i$ we compute (i) the proportion with which it occurs with each of the $K$ topics (i.e. $p(w_i | t_i)$, and (ii) the proportion of words in a document assigned to each of the $K$ topics (i.e. $p(t_i | d_i)$). Subsequently, we choose a new topic for $w_i$ with probability $p(w_i | t_i)) * $p(t_i | d_i)$. By repeating this for a large number of trials, the assignments will slowly improve, thus reflecting the topic mixtures of the documents.
+A well-known inference technique is the **collapsed Gibbs sampler** (as discussed in, e.g., Griffiths & Steyvers 2004). Leaving any technicalities aside and glossing over many details, this technique works as follows. Given a collection of documents, we aim to estimate their topic mixtures and the words associated with each topic. First we need to hypothesize how many topics $K$ are in the collection. Subsequently we go over all words in each individual document and randomly(!) assign it to one of the $K$ topics. Note that this random assignment of words to topics already provides us with a topic mixtures and topic-word distribution, though, needless to say, their quality leaves much to be desired. The remaining steps of the procedure aim to improve this initial assignment by iterating over the documents, and for each word $w_i$ in a particular document $d_i$ we compute (i) the proportion with which it occurs with each of the $K$ topics (i.e. $p(w_i | t_i)$, and (ii) the proportion of words in a document assigned to each of the $K$ topics (i.e. $p(t_i | d_i)$). Subsequently, we choose a new topic for $w_i$ with probability $p(w_i | t_i) * p(t_i | d_i)$. By repeating this for a large number of trials, the assignments will slowly improve, thus reflecting a better topic mixture of the documents. 
 
-## Vector Space Model
+In the remainder of this tutorial, we will apply Topic Modeling to the K-pop dataset. Before that we first need to discuss some essential data preprocessing steps for data representation. This will be the topic of the next section.
 
-```python
->>> import pandas as pd
-...
->>> metadata = pd.read_excel("../data/videos.xlsx")
-```
+## Data Preprocessing
+
+As stated above, Topic Models operate on the word level and ignore the linear ordering of words in documents. Essentially, all we need to know is how often each word in the collection occurs in each document. An efficient data representation capturing this information is the so-called **bag-of-words model**, in which a document is represented as a histogram over the vocabulary (i.e. we list for each word type in the collection how often it occurs in a particular document). A collection of bag-of-words is called a vector-space model. The Machine Learning library scikit-learn provides efficient procedures to construct this representation on the basis of raw text files. In the following code block, we first construct a list containing the paths to all text files in the corpus. For reasons that will be clear in a moment, we subsequently shuffle this list randomly. 
 
 ```python
 >>> import glob
->>> import re
-...
->>> ID_re = re.compile(r'.*?_eng-(.*?)_commentsOnly.txt')
 ...
 >>> filepaths = glob.glob('../data/kpop_videos/*/*.txt')
 >>> random.shuffle(filepaths)
->>> video_ids = [ID_re.search(path.split('/')[-1]).group(1) for path in filepaths]
->>> group_names = [path.split('/')[-2] for path in filepaths]
 ```
+
+Scikit-learn's `feature_extraction.text` module provides a `CountVectorizer` object with which collections of text documents can easily be converted into a vector space model. In the code block below we first import the module under the alias `text`. Subsequently, we initialize an instance of `CountVectorizer`. The `CountVectorizer` specifies a wide range of argument enabling developers to tune the vectorizer to their own needs. Here, we specify the following four arguments. First, we set the input to be a list of filenames, from which the raw contents will be fetched during the vectorization process. Second, the `min_df` argument specifies a the minimum document frequency of terms to be included in the model. All terms that occur in less documents than the value given to `min_df` will be ignored. The third argument specifies a custom regular expression to be used for tokenizing the raw text documents into word tokens. Note that we are only interested in terms with at least three characters. Finally, to remove highly frequent and often less informative words from the model, we specify to ignore all terms present in the English stopword list of Scikit-Learn. After initializing the vectorizer, we call its method `fit_transform` to transform our K-pop corpus into a document-term matrix, in which row represent documents and columns the vocabulary of the collection. Individual cells, then, represent the frequency with which particular words occur in specific documents. 
 
 ```python
 >>> import sklearn.feature_extraction.text as text
@@ -75,16 +70,25 @@ A well-know inference technique is the collapsed Gibbs sampler (as discussed in,
 >>> dtm = vectorizer.fit_transform(filepaths)
 ```
 
+As shown by the output of the following code block, the document-term matrix consists of 202 documents (rows), 36,253 word types (columns), and a total of 14,393,178 word tokens:
+
 ```python
 >>> print(f'Shape of document-term matrix: {dtm.shape}. Number of tokens {dtm.sum()}')
 Shape of document-term matrix: (202, 36253). Number of tokens 14393178
 ```
 
-## Topic Modeling K-Pop
+Before we continue with constructing a Topic Model on the basis of this document-term matrix, it would be convenient to first extract the video IDs corresponding to the filenames as well the corresponding K-pop group names:
 
----
-scrolled: true
+```python
+>>> import re
 ...
+>>> ID_re = re.compile(r'.*?_eng-(.*?)_commentsOnly.txt')
+...
+>>> video_ids = [ID_re.search(path.split('/')[-1]).group(1) for path in filepaths]
+>>> group_names = [path.split('/')[-2] for path in filepaths]
+```
+
+## Topic Modeling K-Pop
 
 ```python
 >>> import lda
