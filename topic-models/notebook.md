@@ -1,11 +1,8 @@
 ```python
 >>> %matplotlib inline
->>> import matplotlib.pyplot as plt
->>> plt.style.use('seaborn')
->>> import warnings
->>> warnings.filterwarnings('ignore')
->>> import random
->>> random.seed(1)
+>>> import matplotlib.pyplot as plt; plt.style.use('seaborn')
+>>> import warnings; warnings.filterwarnings('ignore')
+>>> import random; random.seed(1)
 ```
 
 # A Brief Introduction to Topic Modeling with Python
@@ -14,7 +11,7 @@
 
 In this session we will employ an unsupervised model of text, one which often goes under the name 'Topic Model', to explore and make visible thematic aspects in the K-Pop comments dataset. Topic Models, or more precisely, mixed-membership models, have gained a lot of popularity as a method for identifying and organizing topical and thematic structures in text documents and text corpora (see e.g. Blei et al. 2003,  Griffiths & Steyvers 2004). The goal of this session is to introduce the very basics of Topic Models, and, subsequently, to show how Python can be employed to apply Topic Models to the K-Pop dataset. Ignoring any mathematical details, this introduction will primarily focus on the implementation and execution of Topic Models in Python, allowing us to concentrate on the interpretation, evaluation and visualization of the results.
 
-This session is structured as follows. We will first give a brief introduction into the general concepts underlying Topic Modeling. In the subsequent sections, we will work our way through (i) the necessary steps to implement a Topic Model in Python and apply it to the K-Pop dataset, and (ii) means of evaluating and visualizing the results. We conclude with a discussion of a number of Python libraries for Topic Modeling and additional further reading.
+This session is structured as follows. We will first give a brief introduction into the general concepts underlying Topic Modeling. In the subsequent sections, we will work our way through (i) the necessary steps to implement a Topic Model in Python and apply it to the K-Pop dataset, and (ii) the means of evaluating and visualizing the results.
 
 ## Topic Modeling
 
@@ -26,14 +23,14 @@ Consider the following five mini-documents:
 4. The camera absolutely loves Lisa.
 5. I'm like super late because I never really watch BTS of music videos so how come they fast forward Lisa's rap?
 
-Topic Modeling is essentially a technique to automatically discover 'topics' in these documents without utilizing any knowledge except their words. For instance, a Topic Model might discover that documents 1 and 2 are about BTS and K-Pop (Topic 1), whereas documents 3 and 4 are about Lisa from the group Blackpink and how lovable she is (Topic 2). Document 5, then, appears to be a mixture of these two topics. Note that topics are represented a distributions over a vocabulary. For example, Topic 1 could be represented as '50% BTS, 30% K-Pop, 10% videos ...', and Topic 2 as '47% Lisa, 35% love, 4% 😍, ...'. There are various methods to perform Topic Modeling. In what follows, we will discuss and employ the well-known technique 'Latent Dirichlet Allocation' or LDA for short.
+Topic Modeling is essentially a technique to automatically discover 'topics' in these documents (i.e. without utilizing any knowledge except their words). For instance, a Topic Model might discover that documents 1 and 2 are about BTS and K-Pop (Topic 1), whereas documents 3 and 4 are about Lisa from the group Blackpink and how lovable she is (Topic 2). Document 5, then, appears to be a mixture of these two topics. Note that topics are represented as distributions over a vocabulary. For example, Topic 1 could be represented as '50% BTS, 30% K-Pop, 10% videos ...', and Topic 2 as '47% Lisa, 35% love, 4% 😍, ...'. There are various methods to perform Topic Modeling. In what follows, we will discuss and employ the well-known technique 'Latent Dirichlet Allocation' or LDA for short.
 
 Latent Dirichlet Allocation is a so-called *generative model*, which specifies a procedure with which documents are written. LDA has the following naive assumption about how to write a text:
 
 1. Choose the number of words $N$ in your document;
-2. Choose a topic mixture for your document (e.g., 60% about Topic 1 and 40% about Topic 2);
+2. Choose a topic mixture $\theta$ for your document (e.g., 60% about Topic 1 and 40% about Topic 2);
 3. While the number of generated words is smaller than N, generate a word $w_i$ by:
-    1. choosing a topic according to the chosen topic mixture;
+    1. choosing a topic according to the chosen topic mixture $\theta$;
     2. choosing a word according the topic's distribution over the vocabulary.
 
 According to this procedure, we might write (or generate) a text as follows:
@@ -44,22 +41,22 @@ According to this procedure, we might write (or generate) a text as follows:
 
 If it wasn't already, it should be clear by now that LDA has a completely unrealistic view on how documents are created. For example, it completely ignores all syntax and basically treats documents as bags of words. Yet, LDA's generative writing assumption is an explicit and powerful one, which, once reversed, enables us -- at least to a certain extent -- to *infer* topic mixtures and their associated words.
 
-A well-known inference technique is the **collapsed Gibbs sampler** (as discussed in, e.g., Griffiths & Steyvers 2004). Leaving any technicalities aside and glossing over many details, this technique works as follows. Given a collection of documents, we aim to estimate their topic mixtures and the words associated with each topic. First we need to hypothesize how many topics $K$ are in the collection. Subsequently we go over all words in each individual document and randomly(!) assign it to one of the $K$ topics. Note that this random assignment of words to topics already provides us with a topic mixtures and topic-word distribution, though, needless to say, their quality leaves much to be desired. The remaining steps of the procedure aim to improve this initial assignment by iterating over the documents, and for each word $w_i$ in a particular document $d_i$ we compute (i) the proportion with which it occurs with each of the $K$ topics (i.e. $p(w_i | t_i)$, and (ii) the proportion of words in a document assigned to each of the $K$ topics (i.e. $p(t_i | d_i)$). Subsequently, we choose a new topic for $w_i$ with probability $p(w_i | t_i) * p(t_i | d_i)$. By repeating this for a large number of trials, the assignments will slowly improve, thus reflecting a better topic mixture of the documents.
+A well-known inference technique is the **collapsed Gibbs sampler** (as discussed in, e.g., Griffiths & Steyvers 2004). Leaving any technicalities aside and glossing over many details, this technique works as follows. Given a collection of documents, we aim to estimate their topic mixtures and the words associated with each topic. First we need to hypothesize how many topics $K$ are in the collection. Subsequently we go over all words in each individual document and randomly(!) assign it to one of the $K$ topics. Note that this random assignment of words to topics already provides us with a topic mixtures and topic-word distribution, though, needless to say, their quality leaves much to be desired. The remaining steps of the procedure aim to improve this initial assignment by iterating over the documents, and for each word $w_i$ in a particular document $d_i$ we compute (i) the proportion with which it occurs with each of the $K$ topics (i.e. $p(w_i | t_i)$, and (ii) the proportion of words in a document assigned to each of the $K$ topics (i.e. $p(t_i | d_i)$). Subsequently, we choose a new topic for $w_i$ with probability $p(w_i | t_i) * p(t_i | d_i)$. By repeating this procedure for a large number of trials, the assignments will slowly improve, thus reflecting a better topic mixture of the documents.
 
 In the remainder of this tutorial, we will apply Topic Modeling to the K-pop dataset. Before that we first need to discuss some essential data preprocessing steps for data representation. This will be the topic of the next section.
 
 ## Data Preprocessing
 
-As stated above, Topic Models operate on the word level and ignore the linear ordering of words in documents. Essentially, all we need to know is how often each word in the collection occurs in each document. An efficient data representation capturing this information is the so-called **bag-of-words model**, in which a document is represented as a histogram over the vocabulary (i.e. we list for each word type in the collection how often it occurs in a particular document). A collection of bag-of-words is called a vector-space model. The Machine Learning library scikit-learn provides efficient procedures to construct this representation on the basis of raw text files. In the following code block, we first construct a list containing the paths to all text files in the corpus. For reasons that will be clear in a moment, we subsequently shuffle this list randomly.
+As stated above, Topic Models operate on the word level and ignore the linear ordering of words in documents. As such, all we need to know is how often each word in the collection occurs in each document. An efficient data representation capturing this information is the so-called **bag-of-words model**, in which documents are represented as histograms over the vocabulary (i.e. we list for each word type in the collection how often it occurs in a particular document). A collection of bag-of-words is called a vector-space model. The Machine Learning library scikit-learn provides efficient procedures to construct this representation on the basis of raw text files. In the following code block, we first construct a list containing the paths to all text files in the corpus. For reasons that will be clear in a moment, we subsequently shuffle this list randomly.
 
 ```python
 >>> import glob
 ...
->>> filepaths = glob.glob('../data/kpop_videos/*/*.txt')
+>>> filepaths = glob.glob('../data/kpop_videos_comments/*/*.txt')
 >>> random.shuffle(filepaths)
 ```
 
-Scikit-learn's `feature_extraction.text` module provides a `CountVectorizer` object with which collections of text documents can easily be converted into a vector space model. In the code block below we first import the module under the alias `text`. Subsequently, we initialize an instance of `CountVectorizer`. The `CountVectorizer` specifies a wide range of argument enabling developers to tune the vectorizer to their own needs. Here, we specify the following four arguments. First, we set the input to be a list of filenames, from which the raw contents will be fetched during the vectorization process. Second, the `min_df` argument specifies a the minimum document frequency of terms to be included in the model. All terms that occur in less documents than the value given to `min_df` will be ignored. The third argument specifies a custom regular expression to be used for tokenizing the raw text documents into word tokens. Note that we are only interested in terms with at least three characters. Finally, to remove highly frequent and often less informative words from the model, we specify to ignore all terms present in the English stopword list of Scikit-Learn. After initializing the vectorizer, we call its method `fit_transform` to transform our K-pop corpus into a document-term matrix, in which row represent documents and columns the vocabulary of the collection. Individual cells, then, represent the frequency with which particular words occur in specific documents.
+Scikit-learn's `feature_extraction.text` module provides a `CountVectorizer` object with which collections of text documents can easily be converted into a vector space model. In the code block below, we first import the module under the alias `text`. Subsequently, we initialize an instance of `CountVectorizer`. The `CountVectorizer` specifies a wide range of arguments enabling developers to tune the vectorizer to their own needs. Here, we specify the following four arguments. First, we set the input to be a list of filenames, from which the raw contents will be fetched during the vectorization process. Second, the `min_df` argument specifies a the minimum document frequency of terms to be included in the model. All terms that occur in less documents than the value given to `min_df` will be ignored. The third argument specifies a custom regular expression to be used for tokenizing the raw text documents into word tokens. Note that we are only interested in terms with at least three characters. Finally, to remove highly frequent and often less informative words from the model, we specify to ignore all terms present in the English stopword list of Scikit-Learn. After initializing the vectorizer, the method `fit_transform` is called to transform the K-pop comment collection into a document-term matrix, in which rows represent documents and columns the vocabulary of the collection. Individual cells, then, represent the frequency with which particular words occur in specific documents.
 
 ```python
 >>> import sklearn.feature_extraction.text as text
@@ -74,23 +71,18 @@ As shown by the output of the following code block, the document-term matrix con
 
 ```python
 >>> print(f'Shape of document-term matrix: {dtm.shape}. Number of tokens {dtm.sum()}')
-Shape of document-term matrix: (202, 36253). Number of tokens 14393178
 ```
 
-Before we continue with constructing a Topic Model on the basis of this document-term matrix, it would be convenient to first extract the video IDs corresponding to the filenames as well their corresponding K-pop group names:
+Before we move on to the construction of a Topic Model on the basis of this document-term matrix, it would be convenient to first extract the video IDs corresponding to the filenames as well their corresponding K-pop group names:
 
 ```python
->>> import re
-...
->>> ID_re = re.compile(r'.*?_eng-(.*?)_commentsOnly.txt')
-...
->>> video_ids = [ID_re.search(path.split('/')[-1]).group(1) for path in filepaths]
+>>> video_ids = [path.split('/')[-1].replace('.txt', '') for path in filepaths]
 >>> group_names = [path.split('/')[-2] for path in filepaths]
 ```
 
 ## Topic Modeling K-Pop
 
-Having preprocessed and transformed the data collection into a document-term matrix, we move on to the core of this tutorial and construct a Topic Model for the K-pop collection. There are a number of high-quality implementations of latent Dirichlet Allocation in Python, of which [gensim](https://radimrehurek.com/gensim/) by Radim Řehůřek (2010) and Scikit-learn (Pedregosa et al. 2011) are probably the most well-known. In this tutorial we will employ the excellent and intuitive library by Allen Riddell, [`lda`](https://github.com/lda-project/lda) which implements latent Dirichlet allocation (LDA) using collapsed Gibbs sampling. `lda` is fast and is tested on Linux, OS X, and Windows. It can be installed directly from the notebook by executing the following cell:
+Having preprocessed and transformed the data collection into a document-term matrix, we move on to the core of this tutorial and construct a Topic Model for the K-pop comments collection. There are a number of high-quality implementations of latent Dirichlet Allocation available in Python, of which [gensim](https://radimrehurek.com/gensim/) by Radim Řehůřek (2010) and Scikit-learn (Pedregosa et al. 2011) are probably the most well-known. In this tutorial we will employ the excellent and intuitive library by Allen Riddell, [`lda`](https://github.com/lda-project/lda), which implements latent Dirichlet allocation (LDA) using collapsed Gibbs sampling. `lda` is fast and is tested on Linux, MacOS, and Windows. It can be installed directly from the notebook by executing the following cell:
 
 ```python
 >>> !pip install lda
@@ -105,7 +97,7 @@ After installing the package, we import it in the next code block and initialize
 >>> tm = lda.LDA(n_topics=n_topics, n_iter=1500, random_state=1)
 ```
 
-Latent Dirichlet Allocation, and especially implementations employing the collapsed Gibbs sampler are computationally intensive and expensive procedures which can take long to train for large collections like the K-pop collection. Training the model for the K-pop collection for 1500 iterations and 25 topics take a little over an hour on a 2015 Mac Book Pro. Patient readers are invited to uncomment the following cell and train the model themselves:
+Latent Dirichlet Allocation (especially implementations employing the collapsed Gibbs sampler) is a computationally intensive and expensive procedure, which can take a considerable amount of time to train when applied to large text collections. For instance, training a model for the K-pop collection with 1500 iterations and 25 topics takes a little over an hour on a 2015 MacBook Pro. Patient readers are invited to uncomment the following cell and train the model themselves:
 
 ```python
 >>> # document_topic_distributions = tm.fit_transform(dtm)
@@ -129,7 +121,7 @@ For the less patient readers, we have supplied a pre-trained model, which can be
 >>> document_topic_distributions = np.load('models/kpop-dtd-T25.npy')
 ```
 
-After training, `tm.components` represents a NumPy array with the topic word distributions. The topic mixtures per document can be found in `document_topic_distributions` which is also represented by a NumPy array. For exploration purposes, it might be more convenient to convert these two array objects into `DataFrame` objects with explicit row and column names, which is accomplished by executing the following code block.
+After training, `tm.components` represents a NumPy array with the topic-word distributions. The topic mixtures per document can be found in `document_topic_distributions` which is also represented as a NumPy array. For exploration purposes, it might be more convenient to convert these two array objects into `DataFrame` objects with explicit row and column names, which is accomplished by executing the following code block.
 
 ```python
 >>> import pandas as pd
@@ -144,7 +136,7 @@ After training, `tm.components` represents a NumPy array with the topic word dis
 ...     document_topic_distributions, columns=topic_names, index=video_ids)
 ```
 
-The index of `document_topic_distributions` refers to the previously compiled list of video IDs. It enables it to conveniently retrieve the topic mixture for a specific document. For example, to list the 10 most likely topics for video `RuntXwPvvaE`, we write:
+The index of `document_topic_distributions` refers to the previously compiled list of video IDs. It enables us to conveniently retrieve the topic mixture for a specific document. For example, to list the 10 most likely topics for video `RuntXwPvvaE`, we write:
 
 ```python
 >>> document_topic_distributions.loc['RuntXwPvvaE'].sort_values(ascending=False).head(10)
@@ -183,11 +175,11 @@ To further explore the topics and topic mixtures inferred by LDA, we will create
 >>> import pyLDAvis
 ...
 >>> viz_prep = pyLDAvis.prepare(
-...     topic_word_distributions.values, # (i)
-...     document_topic_distributions.values, # (ii)
-...     dtm.sum(axis=1).getA1(), # (iii) compute the total number of tokens in each document
-...     vocab, # (iv)
-...     dtm.sum(axis=0).getA1(), # (v) compute the total frequency of occurrence for each term
+...     topic_word_distributions.values, # (i) see text;
+...     document_topic_distributions.values, # (ii) see text;
+...     dtm.sum(axis=1).getA1(), # (iii) compute the total number of tokens in each document;
+...     vocab, # (iv) see text;
+...     dtm.sum(axis=0).getA1(), # (v) compute the total frequency of occurrence for each term.
 >>> )
 ```
 
@@ -195,16 +187,15 @@ In this preparation stage, pyLDAvis will employ a dimension reduction technique 
 
 ```python
 >>> pyLDAvis.display(viz_prep)
-<IPython.core.display.HTML object>
 ```
 
-While pyLDAvis produces a wonderful interactive playground to explore the inferred topics and their relationships in detail, it might sometimes be informative and interesting to gain insight into which videos are typically associated with a particular topic. By querying the `document_topic_distributions` matrix for a certain topic we can retrieve the ID of the video in which that topic is most prominent. For example, the following returns the video ID in which Topic 1 features prominently:
+While pyLDAvis produces a wonderful interactive playground to explore the inferred topics and their relationships in detail, it might sometimes be informative and interesting to gain more insight into which videos are typically associated with a particular topic. By querying the `document_topic_distributions` matrix for a certain topic, we can retrieve the ID of the video in which that topic is most prominent. For example, the following returns the video ID in which Topic 1 features prominently:
 
 ```python
 >>> document_topic_distributions['Topic 1'].argmax()
 ```
 
-We could take the returned video ID and search for the corresponding video on YouTube, but it's much more convenient (and 😎) if we could do that directly in the notebook. The following code block implements a small function `best_video_for_topic` which takes as argument the name of a particular topic and renders the video in which it features most prominently directly in the notebook:
+We could take the returned video ID and search for the corresponding video on YouTube, but it's much more convenient (and 😎) if we could do so directly in the notebook. The following code block implements a small function `best_video_for_topic` which takes the name of a particular topic as argument, and renders the video in which it features most prominently directly in the notebook:
 
 ```python
 >>> from IPython.display import YouTubeVideo
@@ -218,7 +209,6 @@ Let's invoke the function, for instance for Topic 1:
 
 ```python
 >>> best_video_for_topic('Topic 1')
-<IPython.lib.display.YouTubeVideo at 0x171b35ac8>
 ```
 
 ## Exercises
