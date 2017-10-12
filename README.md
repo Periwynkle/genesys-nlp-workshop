@@ -12,7 +12,7 @@ To attend and fully benefit from the training day, we expect participants to hav
 
 The workshop requires an installation of Python 3.6 or higher versions on Linux, macOS, or Microsoft Windows. We highly recommend that participants install Python through the Anaconda distribution (https://www.continuum.io/), which bundles together a range of open-source Python packages and libraries used in data analysis and scientific computing—it includes Jupyter Notebook, the web application that we will be using in the workshops to run our code. Alternatively, you can install Python using a binary installer from the Python Software Foundation (https://www.python.org/), or through an operating system’s package manager (e.g., apt on Debian Linux and homebrew on macOS).
 
-As noted above, it is essential that participants download not only Python 3.6 or higher, but also Jupyter Notebook. A very useful Jupyter Notebook Quick Start Guide can be found here: https://jupyter-notebook-beginner-guide.readthedocs.io/en/latest/install.html. As noted above, Jupyter Notebook is included in the Anaconda distribution, so does not have to be downloaded separately. Participants who are unfamiliar with Jupyter should watch this 30-minute YouTube tutorial prior to the workshop (not strictly required, but highly recommended): https://www.youtube.com/watch?v=HW29067qVWk&t=4s 
+As noted above, it is essential that participants download not only Python 3.6 or higher, but also Jupyter Notebook. A very useful Jupyter Notebook Quick Start Guide can be found here: https://jupyter-notebook-beginner-guide.readthedocs.io/en/latest/install.html. As noted above, Jupyter Notebook is included in the Anaconda distribution, so does not have to be downloaded separately. Participants who are unfamiliar with Jupyter should watch this 30-minute YouTube tutorial prior to the workshop (not strictly required, but highly recommended): https://www.youtube.com/watch?v=HW29067qVWk&t=4s
 
 ### SentiStrength Overview and Installation Instructions
 
@@ -47,3 +47,9 @@ The **SentiStrength software** and data files for the workshop are in the follow
 **Martin Wynne** is a digital research specialist in the Bodleian Libraries at the University of Oxford. Martin runs the Oxford Text Archive, a repository of digital literary and linguistic datasets, which has been in operation since 1976. Martin has worked in research, teaching, and support in corpus linguistics and digital humanities since the early 1990s. Martin is one of the founders of CLARIN, and has served as a member of the Executive Committee and the Board of Directors. He is National Coordinator for CLARIN in the UK.
 
 **Chico Camargo** is a research assistant at the Oxford Internet Institute working on network science and traffic modelling. His doctoral research at the University of Oxford’s Department of Physics uses complex systems and data science to study evolution. Chico is fascinated not only by how genes and living things change, but also by how culture, language, and society changes. He is a core member of the TORCH #SocialHumanities network.
+
+## Licence
+
+The materials of this workshop are available under a [Creative Commons BY-CC-NC-SA 4.0 License](https://creativecommons.org/licenses/by-nc-sa/4.0/). See LICENSE for text.
+
+Copyright 2017 Yin Yin Lu, Mike Thelwall, Folgert Karsdorp, Martin Wynne, Chico Camargo
