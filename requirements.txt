@@ -1,3 +1,6 @@
-pyLDAvis>=2.1.1
+numpy>=1.13.1
+pandas>=0.20.3
 scikit-learn>=0.19
 lda>=1.0.5
+pyLDAvis>=2.1.1
+IPython>=6.1.0
